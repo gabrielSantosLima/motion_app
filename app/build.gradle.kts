@@ -47,14 +47,14 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation(libs.androidx.camera.compose)
 
+    // MediaPipe
+    implementation(libs.mediapipe.tasks.vision)
+
     // Accompanist Permissions
     implementation(libs.accompanist.permissions)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
-
-    // MediaPipe
-    implementation(libs.tasks.vision)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

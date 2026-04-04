@@ -14,18 +14,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.gabriel.motionapp.R
 import com.gabriel.motionapp.core.ui.components.Header
+import com.gabriel.motionapp.hand_tracking.services.HandTrackingService
 
 @Composable
 fun CameraDebuggerScreen(navController: NavController) {
+    val context = LocalContext.current
+    val handTrackingService = HandTrackingService(context)
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        CameraPreview()
+        CameraPreview(handTrackingService)
         Header(
             modifier = Modifier
                 .background(Color.Transparent)

@@ -33,12 +33,12 @@ class CameraPreviewViewModel : ViewModel() {
     suspend fun bindToCamera(
         context: Context,
         lifecycleOwner: LifecycleOwner,
-        onReceiveImage: (image: Bitmap) -> Unit
+        onReceiveImage: (image: Bitmap, rotation: Int) -> Unit
     ) {
         val processCameraProvider = ProcessCameraProvider.awaitInstance(context)
 
         imageAnalysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(context)) { imageProxy ->
-            onReceiveImage(imageProxy.toBitmap())
+            onReceiveImage(imageProxy.toBitmap(), imageProxy.imageInfo.rotationDegrees)
             imageProxy.close()
         }
 
