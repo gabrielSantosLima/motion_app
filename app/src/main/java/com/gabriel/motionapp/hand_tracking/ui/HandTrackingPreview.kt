@@ -1,16 +1,14 @@
-package com.gabriel.motionapp.camera.ui
+package com.gabriel.motionapp.hand_tracking.ui
 
+import android.graphics.Bitmap
+import android.util.Log
 import androidx.camera.compose.CameraXViewfinder
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,47 +28,17 @@ import com.gabriel.motionapp.camera.view_model.CameraPreviewViewModel
 import com.gabriel.motionapp.hand_tracking.services.HandTrackingService
 import com.gabriel.motionapp.hand_tracking.use_cases.DetectHandUseCase
 import com.gabriel.motionapp.hand_tracking.use_cases.ListenTrackingResultUseCase
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
 @Composable
-@OptIn(ExperimentalPermissionsApi::class)
-fun CameraPreview(handTrackingService: HandTrackingService) {
-    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
-    if (cameraPermissionState.status.isGranted) {
-        CameraPreviewContent(handTrackingService = handTrackingService)
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(40.dp),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 10.dp,
-                alignment = Alignment.CenterVertically
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "You don't have access to the camera. Click the button below to give access to your camera.",
-                textAlign = TextAlign.Center
-            )
-            Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
-                Text("Open the camera")
-            }
-        }
-    }
-}
-
-@Composable
-fun CameraPreviewContent(
+fun HandTrackingPreview(
     viewModel: CameraPreviewViewModel = CameraPreviewViewModel(),
     handTrackingService: HandTrackingService
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val tag = "CameraPreviewContent"
 
     // States
     var lastLandMarkResult by remember { mutableStateOf<HandLandmarkerResult?>(null) }
@@ -82,13 +49,18 @@ fun CameraPreviewContent(
     val listenTrackingResultUseCase = ListenTrackingResultUseCase(handTrackingService)
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
+    fun onReceiveImage(image: Bitmap, rotation: Int) {
+        Log.d(tag, "Received image [w=${image.width}, h=${image.height}]")
+        currentRotation = rotation
+        detectHandUseCase.execute(image, rotation)
+    }
+
     LaunchedEffect(Unit) {
         listenTrackingResultUseCase.execute { result ->
             lastLandMarkResult = result
         }
         viewModel.bindToCamera(context, lifecycleOwner) { bitmap, rotation ->
-            currentRotation = rotation
-            detectHandUseCase.execute(bitmap, rotation)
+            onReceiveImage(bitmap, rotation)
         }
     }
 

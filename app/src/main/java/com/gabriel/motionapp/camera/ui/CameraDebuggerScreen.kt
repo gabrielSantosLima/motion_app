@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import com.gabriel.motionapp.R
 import com.gabriel.motionapp.core.ui.components.Header
 import com.gabriel.motionapp.hand_tracking.services.HandTrackingService
+import com.gabriel.motionapp.hand_tracking.ui.HandTrackingPreview
 
 @Composable
 fun CameraDebuggerScreen(navController: NavController) {
@@ -30,7 +31,9 @@ fun CameraDebuggerScreen(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        CameraPreview(handTrackingService)
+        CameraPermissionHandler() {
+            HandTrackingPreview(handTrackingService = handTrackingService)
+        }
         Header(
             modifier = Modifier
                 .background(Color.Transparent)

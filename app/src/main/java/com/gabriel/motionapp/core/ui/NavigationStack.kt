@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gabriel.motionapp.camera.ui.CameraDebuggerScreen
+import com.gabriel.motionapp.gesture.ui.GestureDebuggerScreen
 
 @Composable
 fun NavigationStack() {
@@ -22,6 +23,9 @@ fun NavigationStack() {
         }
         composable(route = Route.CameraDebugger.route) {
             CameraDebuggerScreen(navController)
+        }
+        composable(route = Route.GestureDebugger.route) {
+            GestureDebuggerScreen(navController)
         }
     }
 }

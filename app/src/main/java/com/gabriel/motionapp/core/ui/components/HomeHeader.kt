@@ -69,6 +69,21 @@ fun HomeHeader(navController: NavController) {
                         Text("Camera Debugger")
                     }
                 }, onClick = { navController.navigate(Route.CameraDebugger.route) })
+                DropdownMenuItem(text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(
+                            4.dp,
+                            alignment = Alignment.CenterHorizontally
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.code_24px),
+                            contentDescription = "Code"
+                        )
+                        Text("Gesture Debugger")
+                    }
+                }, onClick = { navController.navigate(Route.GestureDebugger.route) })
             }
         }
     }
