@@ -1,10 +1,8 @@
-package com.gabriel.motionapp.hand_tracking.ui
+package com.gabriel.motionapp.gesture.ui
 
 import android.graphics.Bitmap
-import androidx.camera.compose.CameraXViewfinder
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -20,53 +18,54 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gabriel.motionapp.camera.view_model.CameraPreviewViewModel
+import com.gabriel.motionapp.gesture.use_cases.DetectGestureUseCase
+import com.gabriel.motionapp.gesture.view_model.GesturePanelViewModel
 import com.gabriel.motionapp.hand_tracking.services.HandTrackingService
+import com.gabriel.motionapp.hand_tracking.ui.HandTrackingCanvas
 import com.gabriel.motionapp.hand_tracking.use_cases.DetectHandUseCase
 import com.gabriel.motionapp.hand_tracking.use_cases.ListenTrackingResultUseCase
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
+val detectGestureUseCase = DetectGestureUseCase()
+
 @Composable
-fun HandTrackingPreview(
-    viewModel: CameraPreviewViewModel = CameraPreviewViewModel(),
+fun GesturePanel(
+    viewModel: GesturePanelViewModel = GesturePanelViewModel(),
     handTrackingService: HandTrackingService
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val tag = "GesturePanel"
 
-    // States
+    // Use Cases
+    val detectHandUseCase = DetectHandUseCase(handTrackingService)
+    val listenTrackingResultUseCase = ListenTrackingResultUseCase(handTrackingService)
+
     var currentLandmarks by remember { mutableStateOf<HandLandmarkerResult?>(null) }
     var currentRotation by remember { mutableIntStateOf(0) }
-    val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
     fun onReceiveImage(image: Bitmap, rotation: Int) {
         currentRotation = rotation
-        DetectHandUseCase(handTrackingService).execute(image, rotation)
+        detectHandUseCase.execute(image, rotation)
+    }
+
+    fun detectGesture(result: HandLandmarkerResult) {
+        currentLandmarks = result
+        val gesture = detectGestureUseCase.execute(result)
     }
 
     LaunchedEffect(Unit) {
-        ListenTrackingResultUseCase(handTrackingService).execute { result ->
-            currentLandmarks = result
-        }
+        listenTrackingResultUseCase.execute { detectGesture(it) }
         viewModel.bindToCamera(context, lifecycleOwner) { bitmap, rotation ->
             onReceiveImage(bitmap, rotation)
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        surfaceRequest?.let { request ->
-            CameraXViewfinder(
-                surfaceRequest = request,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HandTrackingCanvas(
             modifier = Modifier
                 .padding(16.dp)
                 .size(300.dp)
-                .align(Alignment.TopCenter)
                 .background(Color.Transparent),
             currentLandmarkResult = currentLandmarks,
             currentRotation = currentRotation
