@@ -7,7 +7,6 @@ import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
 class DetectGestureUseCase() {
     private val palmUpGesture = PalmUpGesture()
-    private var lastExecutionTime = 0L
 
     companion object {
         const val TAG = "DetectGestureUseCase"
@@ -19,12 +18,7 @@ class DetectGestureUseCase() {
         return handTrackingResult.landmarks()[0].size == 21
     }
 
-    fun execute(handTrackingResult: HandLandmarkerResult, minIntervals: Long = 1000L): GestureEnum {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - lastExecutionTime < minIntervals) {
-            return GestureEnum.NONE
-        }
-        lastExecutionTime = currentTime
+    fun execute(handTrackingResult: HandLandmarkerResult): GestureEnum {
         if (!handsExists(handTrackingResult)) {
             return GestureEnum.NONE
         }

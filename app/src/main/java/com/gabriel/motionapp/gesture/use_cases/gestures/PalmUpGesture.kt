@@ -10,13 +10,13 @@ class PalmUpGesture : Gesture(GestureEnum.PALM_UP) {
     }
 
     override fun isPerforming(handTrackingResult: HandLandmarkerResult): GestureEnum {
-        if (handIsExtended(handTrackingResult)) {
-            return GestureEnum.PALM_UP
-        }
         if (reachTheDistanceLimit(handTrackingResult)) {
             return GestureEnum.NONE
         }
-        return super.isPerforming(handTrackingResult)
+        if (handIsExtended(handTrackingResult)) {
+            return GestureEnum.PALM_UP
+        }
+        return GestureEnum.FIST
     }
 
     private fun reachTheDistanceLimit(handTrackingResult: HandLandmarkerResult): Boolean {
