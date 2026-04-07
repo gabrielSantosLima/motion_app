@@ -57,7 +57,7 @@ class HandTrackingService(val context: Context) {
         result: HandLandmarkerResult,
         input: MPImage
     ) {
-        Log.d(TAG, "Hand detected. Input = [w=${input.width}, h=${input.height}]")
+        Log.d(TAG, "onHandDetected [w=${input.width}, h=${input.height}]")
         onHandDetectedListener?.invoke(result)
     }
 

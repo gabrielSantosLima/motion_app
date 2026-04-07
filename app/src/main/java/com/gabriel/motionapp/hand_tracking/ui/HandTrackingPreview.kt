@@ -2,30 +2,18 @@ package com.gabriel.motionapp.hand_tracking.ui
 
 import android.graphics.Bitmap
 import androidx.camera.compose.CameraXViewfinder
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabriel.motionapp.camera.view_model.CameraPreviewViewModel
 import com.gabriel.motionapp.hand_tracking.services.HandTrackingService
 import com.gabriel.motionapp.hand_tracking.use_cases.DetectHandUseCase
-import com.gabriel.motionapp.hand_tracking.use_cases.ListenTrackingResultUseCase
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
 @Composable
 fun HandTrackingPreview(
@@ -36,19 +24,13 @@ fun HandTrackingPreview(
     val context = LocalContext.current
 
     // States
-    var currentLandmarks by remember { mutableStateOf<HandLandmarkerResult?>(null) }
-    var currentRotation by remember { mutableIntStateOf(0) }
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
     fun onReceiveImage(image: Bitmap, rotation: Int) {
-        currentRotation = rotation
         DetectHandUseCase(handTrackingService).execute(image, rotation)
     }
 
     LaunchedEffect(Unit) {
-        ListenTrackingResultUseCase(handTrackingService).execute { result ->
-            currentLandmarks = result
-        }
         viewModel.bindToCamera(context, lifecycleOwner) { bitmap, rotation ->
             onReceiveImage(bitmap, rotation)
         }
@@ -61,15 +43,5 @@ fun HandTrackingPreview(
                 modifier = Modifier.fillMaxSize()
             )
         }
-
-        HandTrackingCanvas(
-            modifier = Modifier
-                .padding(16.dp)
-                .size(300.dp)
-                .align(Alignment.TopCenter)
-                .background(Color.Transparent),
-            currentLandmarkResult = currentLandmarks,
-            currentRotation = currentRotation
-        )
     }
 }
